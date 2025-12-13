@@ -21,7 +21,7 @@ class ProductController extends Controller
      */
     public function create()
     {
-        //
+        return view('products.create');
     }
 
     /**
@@ -29,7 +29,16 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'codigo' => 'required|unique:products,codigo',
+            'nombre' => 'required',
+            'precio' => 'required|numeric|min:0',
+            'existencias' => 'required|integer|min:0',
+        ]);
+
+        Product::create($validated);
+
+        return redirect()->route('products.index');
     }
 
     /**
