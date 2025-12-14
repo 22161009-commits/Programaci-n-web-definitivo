@@ -6,6 +6,12 @@
 <body>
     <h1>Productos</h1>
     
+    @if (session('success'))
+        <div style="color: green;">
+            {{ session('success') }}
+        </div>
+    @endif
+    
     <a href="{{ route('products.create') }}">Agregar producto</a>
     
     <table border="1">
@@ -25,7 +31,14 @@
                     <td>{{ $product->nombre }}</td>
                     <td>{{ $product->precio }}</td>
                     <td>{{ $product->existencias }}</td>
-                    <td></td>
+                    <td>
+                        <a href="{{ route('products.edit', $product) }}">Editar</a>
+                        <form method="POST" action="{{ route('products.destroy', $product) }}" style="display: inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit">Eliminar</button>
+                        </form>
+                    </td>
                 </tr>
             @empty
                 <tr>
