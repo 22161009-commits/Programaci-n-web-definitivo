@@ -10,3 +10,4 @@ Route::get('/', function () {
 // Rutas para POS (Punto de Venta)
 Route::get('/sales/pos', [SaleController::class, 'pos'])->name('sales.pos');
 Route::get('/sales/search', [SaleController::class, 'searchProducts'])->name('sales.search');
+Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
