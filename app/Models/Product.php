@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Product extends Model
 {
@@ -12,4 +13,12 @@ class Product extends Model
         'precio',
         'existencias',
     ];
+
+    /**
+     * Get the providers for the product.
+     */
+    public function providers(): BelongsToMany
+    {
+        return $this->belongsToMany(Provider::class);
+    }
 }
