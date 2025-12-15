@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProviderController;
 use App\Http\Controllers\SaleController;
 use Illuminate\Support\Facades\Route;
 
@@ -10,6 +11,9 @@ Route::get('/', function () {
 
 // Rutas para Productos
 Route::resource('products', ProductController::class);
+
+// Rutas para Proveedores
+Route::resource('providers', ProviderController::class);
 
 // Rutas para Ventas
 // Rutas específicas primero (antes de las rutas con parámetros)
