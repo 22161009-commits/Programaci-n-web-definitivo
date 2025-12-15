@@ -24,7 +24,7 @@ class UpdateProductRequest extends FormRequest
         $productId = $this->route('product')->id;
         
         return [
-            'codigo' => 'required|string|max:255|unique:products,codigo,' . $productId,
+            'codigo' => 'required|string|regex:/^[0-9]+$/|max:255|unique:products,codigo,' . $productId,
             'nombre' => 'required|string|max:255|unique:products,nombre,' . $productId,
             'precio' => 'required|numeric|gt:0',
             'existencias' => 'required|integer|min:0',
@@ -43,6 +43,7 @@ class UpdateProductRequest extends FormRequest
         return [
             'codigo.required' => 'El código del producto es obligatorio.',
             'codigo.string' => 'El código debe ser un texto válido.',
+            'codigo.regex' => 'El código solo puede contener números.',
             'codigo.max' => 'El código no puede tener más de 255 caracteres.',
             'codigo.unique' => 'Ya existe un producto con este código.',
             'nombre.required' => 'El nombre del producto es obligatorio.',

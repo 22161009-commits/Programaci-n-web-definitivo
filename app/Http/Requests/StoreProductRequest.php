@@ -22,7 +22,7 @@ class StoreProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'codigo' => 'required|string|max:255|unique:products,codigo',
+            'codigo' => 'required|string|regex:/^[0-9]+$/|max:255|unique:products,codigo',
             'nombre' => 'required|string|max:255|unique:products,nombre',
             'precio' => 'required|numeric|gt:0',
             'existencias' => 'required|integer|gt:0',
@@ -41,6 +41,7 @@ class StoreProductRequest extends FormRequest
         return [
             'codigo.required' => 'El código del producto es obligatorio.',
             'codigo.string' => 'El código debe ser un texto válido.',
+            'codigo.regex' => 'El código solo puede contener números.',
             'codigo.max' => 'El código no puede tener más de 255 caracteres.',
             'codigo.unique' => 'Ya existe un producto con este código.',
             'nombre.required' => 'El nombre del producto es obligatorio.',

@@ -47,6 +47,23 @@
             font-size: 14px;
             box-sizing: border-box;
         }
+        .price-input-wrapper {
+            position: relative;
+        }
+        .price-input-wrapper::before {
+            content: '$';
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .price-input-wrapper input {
+            padding-left: 28px;
+        }
         input:focus {
             outline: none;
             border-color: #007bff;
@@ -139,6 +156,8 @@
                 id="codigo" 
                 name="codigo" 
                 value="{{ old('codigo') }}"
+                pattern="[0-9]+"
+                title="El código solo puede contener números"
                 class="@error('codigo') error @enderror"
                 required
             >
@@ -168,16 +187,18 @@
             <label for="precio">
                 Precio <span class="required">*</span>
             </label>
-            <input 
-                type="number" 
-                id="precio" 
-                name="precio" 
-                step="0.01"
-                min="0.01"
-                value="{{ old('precio') }}"
-                class="@error('precio') error @enderror"
-                required
-            >
+            <div class="price-input-wrapper">
+                <input 
+                    type="number" 
+                    id="precio" 
+                    name="precio" 
+                    step="0.01"
+                    min="0.01"
+                    value="{{ old('precio') }}"
+                    class="@error('precio') error @enderror"
+                    required
+                >
+            </div>
             @error('precio')
                 <div class="error-text">{{ $message }}</div>
             @enderror
@@ -211,6 +232,7 @@
                 multiple
                 class="@error('providers') error @enderror @error('providers.*') error @enderror"
             >
+                <option value="" disabled selected>-- No agregar por ahora --</option>
                 @if(isset($providers) && $providers->count() > 0)
                     @foreach($providers as $provider)
                         <option 

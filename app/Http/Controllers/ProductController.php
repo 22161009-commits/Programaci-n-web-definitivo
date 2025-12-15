@@ -35,8 +35,10 @@ class ProductController extends Controller
     {
         $product = Product::create($request->validated());
 
-        // Sincronizar proveedores asociados
-        $providers = $request->input('providers', []);
+        // Sincronizar proveedores asociados (filtrar valores vacíos)
+        $providers = array_filter($request->input('providers', []), function($value) {
+            return !empty($value);
+        });
         $product->providers()->sync($providers);
 
         return redirect()->route('products.index')->with('success', 'Producto creado correctamente.');
@@ -67,8 +69,10 @@ class ProductController extends Controller
     {
         $product->update($request->validated());
 
-        // Sincronizar proveedores asociados
-        $providers = $request->input('providers', []);
+        // Sincronizar proveedores asociados (filtrar valores vacíos)
+        $providers = array_filter($request->input('providers', []), function($value) {
+            return !empty($value);
+        });
         $product->providers()->sync($providers);
 
         return redirect()->route('products.index')->with('success', 'Producto actualizado correctamente.');
