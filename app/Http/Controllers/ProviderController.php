@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProviderRequest;
 use App\Http\Requests\UpdateProviderRequest;
+use App\Models\Product;
 use App\Models\Provider;
 use Illuminate\Http\Request;
 
@@ -49,7 +50,9 @@ class ProviderController extends Controller
      */
     public function edit(Provider $provider)
     {
-        return view('providers.edit', compact('provider'));
+        $products = Product::all();
+        $provider->load('products');
+        return view('providers.edit', compact('provider', 'products'));
     }
 
     /**
@@ -58,6 +61,10 @@ class ProviderController extends Controller
     public function update(UpdateProviderRequest $request, Provider $provider)
     {
         $provider->update($request->validated());
+
+        // Sincronizar productos asociados
+        $products = $request->input('products', []);
+        $provider->products()->sync($products);
 
         return redirect()->route('providers.index')->with('success', 'Proveedor actualizado correctamente.');
     }

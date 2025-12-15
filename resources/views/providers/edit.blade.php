@@ -94,6 +94,56 @@
         .btn-secondary:hover {
             background-color: #5a6268;
         }
+        .products-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+        }
+        .products-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .products-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            background-color: white;
+        }
+        .product-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .product-item:last-child {
+            border-bottom: none;
+        }
+        .product-item label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: normal;
+            margin: 0;
+        }
+        .product-item input[type="checkbox"] {
+            margin-right: 10px;
+            width: auto;
+            cursor: pointer;
+        }
+        .product-info {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .product-name {
+            font-weight: 500;
+        }
+        .product-code {
+            color: #6c757d;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -182,6 +232,41 @@
             @error('address')
                 <div class="error-text">{{ $message }}</div>
             @enderror
+        </div>
+        
+        <div class="products-section">
+            <h3>Productos Asociados</h3>
+            <p style="margin-top: 0; color: #6c757d; font-size: 14px;">Selecciona los productos que suministra este proveedor:</p>
+            
+            @error('products')
+                <div class="error-text" style="margin-bottom: 10px;">{{ $message }}</div>
+            @enderror
+            @error('products.*')
+                <div class="error-text" style="margin-bottom: 10px;">{{ $message }}</div>
+            @enderror
+            
+            @if($products->count() > 0)
+                <div class="products-list">
+                    @foreach($products as $product)
+                        <div class="product-item">
+                            <label>
+                                <input 
+                                    type="checkbox" 
+                                    name="products[]" 
+                                    value="{{ $product->id }}"
+                                    {{ in_array($product->id, old('products', $provider->products->pluck('id')->toArray())) ? 'checked' : '' }}
+                                >
+                                <div class="product-info">
+                                    <span class="product-name">{{ $product->nombre }}</span>
+                                    <span class="product-code">Código: {{ $product->codigo }}</span>
+                                </div>
+                            </label>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <p style="color: #6c757d; font-style: italic;">No hay productos registrados en el sistema.</p>
+            @endif
         </div>
         
         <div class="form-actions">

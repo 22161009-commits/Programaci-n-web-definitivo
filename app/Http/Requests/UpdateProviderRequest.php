@@ -29,6 +29,8 @@ class UpdateProviderRequest extends FormRequest
             'phone' => 'nullable|string|max:20',
             'contact_name' => 'nullable|string|max:255',
             'address' => 'nullable|string',
+            'products' => 'nullable|array',
+            'products.*' => 'exists:products,id',
         ];
     }
 
@@ -47,6 +49,8 @@ class UpdateProviderRequest extends FormRequest
             'email.email' => 'El email debe tener un formato válido.',
             'phone.max' => 'El teléfono no puede tener más de 20 caracteres.',
             'contact_name.max' => 'El nombre de contacto no puede tener más de 255 caracteres.',
+            'products.array' => 'Los productos deben ser un array.',
+            'products.*.exists' => 'Uno o más productos seleccionados no existen.',
         ];
     }
 }
