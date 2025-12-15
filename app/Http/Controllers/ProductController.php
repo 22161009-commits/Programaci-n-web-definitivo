@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Product;
+use App\Models\Provider;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -23,7 +24,8 @@ class ProductController extends Controller
      */
     public function create()
     {
-        return view('products.create');
+        $providers = Provider::all();
+        return view('products.create', compact('providers'));
     }
 
     /**
@@ -31,7 +33,11 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
-        Product::create($request->validated());
+        $product = Product::create($request->validated());
+
+        // Sincronizar proveedores asociados
+        $providers = $request->input('providers', []);
+        $product->providers()->sync($providers);
 
         return redirect()->route('products.index')->with('success', 'Producto creado correctamente.');
     }
@@ -49,7 +55,9 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        return view('products.edit', compact('product'));
+        $providers = Provider::all();
+        $product->load('providers');
+        return view('products.edit', compact('product', 'providers'));
     }
 
     /**
@@ -58,6 +66,10 @@ class ProductController extends Controller
     public function update(UpdateProductRequest $request, Product $product)
     {
         $product->update($request->validated());
+
+        // Sincronizar proveedores asociados
+        $providers = $request->input('providers', []);
+        $product->providers()->sync($providers);
 
         return redirect()->route('products.index')->with('success', 'Producto actualizado correctamente.');
     }

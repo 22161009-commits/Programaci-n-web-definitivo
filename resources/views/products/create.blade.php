@@ -88,6 +88,30 @@
         .btn-secondary:hover {
             background-color: #5a6268;
         }
+        select[multiple] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+            min-height: 150px;
+            background-color: white;
+        }
+        select[multiple]:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+        select[multiple] option {
+            padding: 8px;
+        }
+        .select-hint {
+            color: #6c757d;
+            font-size: 12px;
+            margin-top: 5px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -173,6 +197,38 @@
                 required
             >
             @error('existencias')
+                <div class="error-text">{{ $message }}</div>
+            @enderror
+        </div>
+        
+        <div class="form-group">
+            <label for="providers">
+                Proveedores
+            </label>
+            <select 
+                id="providers" 
+                name="providers[]" 
+                multiple
+                class="@error('providers') error @enderror @error('providers.*') error @enderror"
+            >
+                @if(isset($providers) && $providers->count() > 0)
+                    @foreach($providers as $provider)
+                        <option 
+                            value="{{ $provider->id }}"
+                            {{ in_array($provider->id, old('providers', [])) ? 'selected' : '' }}
+                        >
+                            {{ $provider->name }}@if($provider->contact_name) - {{ $provider->contact_name }}@endif
+                        </option>
+                    @endforeach
+                @else
+                    <option disabled>No hay proveedores registrados</option>
+                @endif
+            </select>
+            <div class="select-hint">Mantén presionada la tecla Ctrl (o Cmd en Mac) para seleccionar múltiples proveedores</div>
+            @error('providers')
+                <div class="error-text">{{ $message }}</div>
+            @enderror
+            @error('providers.*')
                 <div class="error-text">{{ $message }}</div>
             @enderror
         </div>

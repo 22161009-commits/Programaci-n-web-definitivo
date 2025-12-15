@@ -28,6 +28,8 @@ class UpdateProductRequest extends FormRequest
             'nombre' => 'required|string|max:255|unique:products,nombre,' . $productId,
             'precio' => 'required|numeric|min:0',
             'existencias' => 'required|integer|min:0',
+            'providers' => 'nullable|array',
+            'providers.*' => 'exists:providers,id',
         ];
     }
 
@@ -53,6 +55,8 @@ class UpdateProductRequest extends FormRequest
             'existencias.required' => 'Las existencias del producto son obligatorias.',
             'existencias.integer' => 'Las existencias deben ser un número entero.',
             'existencias.min' => 'Las existencias no pueden ser menores a 0.',
+            'providers.array' => 'Los proveedores deben ser un array.',
+            'providers.*.exists' => 'Uno o más proveedores seleccionados no existen.',
         ];
     }
 }
