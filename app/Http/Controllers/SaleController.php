@@ -50,6 +50,17 @@ class SaleController extends Controller
     }
 
     /**
+     * Display the specified sale.
+     */
+    public function show(Sale $sale)
+    {
+        // Cargar la venta con sus detalles y productos relacionados
+        $sale->load('saleDetails.product');
+        
+        return view('sales.show', compact('sale'));
+    }
+
+    /**
      * Display the ticket for a sale.
      */
     public function ticket(Sale $sale)

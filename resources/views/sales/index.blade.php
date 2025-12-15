@@ -83,7 +83,7 @@
                     <td>{{ $sale->created_at->format('d/m/Y H:i:s') }}</td>
                     <td>${{ number_format($sale->total, 2) }}</td>
                     <td class="actions">
-                        <a href="{{ route('sales.ticket', $sale) }}" class="view-btn">Ver Detalle</a>
+                        <a href="{{ route('sales.show', $sale) }}" class="view-btn">Ver Detalle</a>
                     </td>
                 </tr>
             @empty

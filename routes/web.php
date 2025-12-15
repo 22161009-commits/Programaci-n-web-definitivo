@@ -17,5 +17,6 @@ Route::get('/sales', [SaleController::class, 'index'])->name('sales.index');
 Route::get('/sales/pos', [SaleController::class, 'pos'])->name('sales.pos');
 Route::get('/sales/search', [SaleController::class, 'searchProducts'])->name('sales.search');
 Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
-// Ruta con parámetro al final
+// Rutas con parámetro al final
+Route::get('/sales/{sale}', [SaleController::class, 'show'])->name('sales.show');
 Route::get('/sales/{sale}/ticket', [SaleController::class, 'ticket'])->name('sales.ticket');
