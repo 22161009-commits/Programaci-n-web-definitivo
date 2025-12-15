@@ -19,8 +19,9 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'email',
+        'employee_number',
         'password',
+        'role',
     ];
 
     /**
@@ -41,8 +42,19 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Generate a unique employee number.
+     */
+    public static function generateEmployeeNumber(): string
+    {
+        $lastUser = self::orderBy('id', 'desc')->first();
+        $lastNumber = $lastUser ? (int) substr($lastUser->employee_number, 1) : 0;
+        $newNumber = $lastNumber + 1;
+        
+        return 'E' . str_pad($newNumber, 6, '0', STR_PAD_LEFT);
     }
 }
