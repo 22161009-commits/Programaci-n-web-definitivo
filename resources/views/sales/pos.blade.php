@@ -97,6 +97,49 @@
             color: red;
             margin-top: 5px;
         }
+        .success {
+            color: green;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+        .confirm-section {
+            margin-top: 20px;
+            padding: 15px;
+            text-align: center;
+        }
+        .confirm-btn {
+            padding: 12px 30px;
+            font-size: 16px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .confirm-btn:hover {
+            background-color: #218838;
+        }
+        .confirm-btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .message-section {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        .message-section.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .message-section.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
     </style>
 </head>
 <body>
@@ -146,6 +189,17 @@
     <div class="total-section">
         <span>Total: $<span id="totalAmount">0.00</span></span>
     </div>
+    
+    <!-- Sección de confirmación de venta -->
+    <div class="confirm-section">
+        <button id="confirmSaleBtn" class="confirm-btn" onclick="confirmSale()" disabled>
+            Confirmar Venta
+        </button>
+        <div id="messageSection" class="message-section"></div>
+    </div>
+    
+    <!-- Token CSRF para las peticiones -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <script>
         // Variable para almacenar el producto seleccionado
@@ -355,6 +409,138 @@
             }, 0);
             
             document.getElementById('totalAmount').textContent = total.toFixed(2);
+            
+            // Habilitar/deshabilitar botón de confirmar según haya productos
+            const confirmBtn = document.getElementById('confirmSaleBtn');
+            if (saleItems.length > 0) {
+                confirmBtn.disabled = false;
+            } else {
+                confirmBtn.disabled = true;
+            }
+        }
+        
+        /**
+         * Confirmar y enviar la venta al servidor
+         */
+        function confirmSale() {
+            // Validar que haya productos
+            if (saleItems.length === 0) {
+                showMessage('No hay productos en la venta.', 'error');
+                return;
+            }
+            
+            // Obtener token CSRF
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            
+            // Preparar el payload según el formato requerido
+            const payload = {
+                products: saleItems.map(item => ({
+                    product_id: item.product_id,
+                    quantity: item.quantity,
+                    price: item.price,
+                    subtotal: item.price * item.quantity
+                })),
+                total: parseFloat(document.getElementById('totalAmount').textContent)
+            };
+            
+            // Deshabilitar botón mientras se procesa
+            const confirmBtn = document.getElementById('confirmSaleBtn');
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'Procesando...';
+            
+            // Ocultar mensajes anteriores
+            hideMessage();
+            
+            // Enviar petición al backend
+            fetch('{{ route("sales.store") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                return response.json().then(data => ({
+                    status: response.status,
+                    data: data
+                }));
+            })
+            .then(result => {
+                if (result.status === 201 && result.data.success) {
+                    // Venta exitosa
+                    showMessage(`¡Venta registrada correctamente! ID: ${result.data.sale_id}`, 'success');
+                    
+                    // Limpiar el carrito después de 2 segundos
+                    setTimeout(() => {
+                        clearCart();
+                        hideMessage();
+                    }, 2000);
+                } else if (result.status === 422) {
+                    // Error de validación
+                    let errorMessage = 'Error de validación: ';
+                    
+                    if (result.data.message) {
+                        errorMessage = result.data.message;
+                    } else if (result.data.errors) {
+                        // Si hay errores de validación estructurados
+                        const errors = Object.values(result.data.errors).flat();
+                        errorMessage = errors.join(', ');
+                    } else {
+                        errorMessage = 'Los datos de la venta no son válidos.';
+                    }
+                    
+                    showMessage(errorMessage, 'error');
+                    confirmBtn.disabled = false;
+                    confirmBtn.textContent = 'Confirmar Venta';
+                } else {
+                    // Otro tipo de error
+                    showMessage(result.data.message || 'Error al procesar la venta. Por favor, intente nuevamente.', 'error');
+                    confirmBtn.disabled = false;
+                    confirmBtn.textContent = 'Confirmar Venta';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Error de conexión. Por favor, verifique su conexión e intente nuevamente.', 'error');
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = 'Confirmar Venta';
+            });
+        }
+        
+        /**
+         * Mostrar mensaje de éxito o error
+         */
+        function showMessage(message, type) {
+            const messageSection = document.getElementById('messageSection');
+            messageSection.textContent = message;
+            messageSection.className = `message-section ${type}`;
+            messageSection.style.display = 'block';
+        }
+        
+        /**
+         * Ocultar mensaje
+         */
+        function hideMessage() {
+            const messageSection = document.getElementById('messageSection');
+            messageSection.style.display = 'none';
+            messageSection.textContent = '';
+        }
+        
+        /**
+         * Limpiar el carrito después de una venta exitosa
+         */
+        function clearCart() {
+            saleItems = [];
+            selectedProduct = null;
+            updateSaleTable();
+            calculateTotal();
+            
+            // Limpiar campos de búsqueda
+            document.getElementById('searchInput').value = '';
+            document.getElementById('productInfo').style.display = 'none';
+            document.getElementById('addProductSection').style.display = 'none';
         }
     </script>
 </body>
