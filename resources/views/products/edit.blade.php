@@ -174,7 +174,7 @@
                 id="precio" 
                 name="precio" 
                 step="0.01"
-                min="0"
+                min="0.01"
                 value="{{ old('precio', $product->precio) }}"
                 class="@error('precio') error @enderror"
                 required

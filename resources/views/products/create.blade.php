@@ -173,7 +173,7 @@
                 id="precio" 
                 name="precio" 
                 step="0.01"
-                min="0"
+                min="0.01"
                 value="{{ old('precio') }}"
                 class="@error('precio') error @enderror"
                 required
@@ -191,7 +191,7 @@
                 type="number" 
                 id="existencias" 
                 name="existencias" 
-                min="0"
+                min="1"
                 value="{{ old('existencias') }}"
                 class="@error('existencias') error @enderror"
                 required
