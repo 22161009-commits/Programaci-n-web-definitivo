@@ -13,6 +13,16 @@ use Illuminate\Support\Facades\Log;
 class SaleController extends Controller
 {
     /**
+     * Display a listing of sales.
+     */
+    public function index()
+    {
+        $sales = Sale::orderBy('created_at', 'desc')->get();
+        
+        return view('sales.index', compact('sales'));
+    }
+
+    /**
      * Display the POS screen.
      */
     public function pos()

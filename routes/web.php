@@ -11,8 +11,9 @@ Route::get('/', function () {
 // Rutas para Productos
 Route::resource('products', ProductController::class);
 
-// Rutas para POS (Punto de Venta)
+// Rutas para Ventas
 // Rutas específicas primero (antes de las rutas con parámetros)
+Route::get('/sales', [SaleController::class, 'index'])->name('sales.index');
 Route::get('/sales/pos', [SaleController::class, 'pos'])->name('sales.pos');
 Route::get('/sales/search', [SaleController::class, 'searchProducts'])->name('sales.search');
 Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
