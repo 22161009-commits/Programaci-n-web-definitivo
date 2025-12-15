@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -27,18 +29,11 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
-        $validated = $request->validate([
-            'codigo' => 'required|unique:products,codigo',
-            'nombre' => 'required',
-            'precio' => 'required|numeric|min:0',
-            'existencias' => 'required|integer|min:0',
-        ]);
+        Product::create($request->validated());
 
-        Product::create($validated);
-
-        return redirect()->route('products.index');
+        return redirect()->route('products.index')->with('success', 'Producto creado correctamente.');
     }
 
     /**
@@ -60,16 +55,9 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Product $product)
+    public function update(UpdateProductRequest $request, Product $product)
     {
-        $validated = $request->validate([
-            'codigo' => 'required|unique:products,codigo,' . $product->id,
-            'nombre' => 'required',
-            'precio' => 'required|numeric|min:0',
-            'existencias' => 'required|integer|min:0',
-        ]);
-
-        $product->update($validated);
+        $product->update($request->validated());
 
         return redirect()->route('products.index')->with('success', 'Producto actualizado correctamente.');
     }
