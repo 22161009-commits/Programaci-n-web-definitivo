@@ -128,9 +128,9 @@
             @csrf
 
             <div class="form-group">
-                <label for="employee_number">Número de Empleado</label>
-                <input type="text" id="employee_number" name="employee_number" value="{{ old('employee_number') }}" required autofocus placeholder="E000001">
-                @error('employee_number')
+                <label for="username">Nombre de Usuario</label>
+                <input type="text" id="username" name="username" value="{{ old('username') }}" required autofocus placeholder="usuario123">
+                @error('username')
                     <div class="error">{{ $message }}</div>
                 @enderror
             </div>
