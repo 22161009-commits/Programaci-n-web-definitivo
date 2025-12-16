@@ -29,6 +29,7 @@ class StoreSaleRequest extends FormRequest
             'products.*.price' => 'required|numeric|min:0',
             'products.*.subtotal' => 'required|numeric|min:0',
             'total' => 'required|numeric|min:0',
+            'total_impuestos' => 'nullable|numeric|min:0',
         ];
     }
 
