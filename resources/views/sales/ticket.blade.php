@@ -166,7 +166,7 @@
         <!-- Información de la venta -->
         <div class="sale-info">
             <p><strong>Ticket #:</strong> {{ $sale->id }}</p>
-            <p><strong>Fecha:</strong> {{ $sale->created_at->format('d/m/Y H:i:s') }}</p>
+            <p><strong>Fecha:</strong> {{ $sale->created_at->setTimezone(config('app.timezone'))->format('d/m/Y H:i:s') }}</p>
         </div>
 
         <!-- Tabla de productos -->
@@ -191,9 +191,15 @@
             </tbody>
         </table>
 
-        <!-- Total -->
+        <!-- Totales -->
         <div class="total-section">
-            <div class="total-label">TOTAL:</div>
+            <div style="margin-bottom: 5px;">
+                <span style="font-size: 11px;">Subtotal: ${{ number_format($sale->total - ($sale->total_impuestos ?? 0), 2) }}</span>
+            </div>
+            <div style="margin-bottom: 5px;">
+                <span style="font-size: 11px;">Impuestos: ${{ number_format($sale->total_impuestos ?? 0, 2) }}</span>
+            </div>
+            <div class="total-label" style="margin-top: 10px; border-top: 1px solid #000; padding-top: 5px;">TOTAL:</div>
             <div class="total-amount">${{ number_format($sale->total, 2) }}</div>
         </div>
 
@@ -204,9 +210,10 @@
         </div>
     </div>
 
-    <!-- Botón de impresión -->
-    <div class="print-button no-print">
+    <!-- Botones de acción -->
+    <div class="print-button no-print" style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
         <button onclick="window.print()">Imprimir Ticket</button>
+        <button onclick="window.location.href='{{ route('sales.pos') }}'" style="background-color: #28a745;">Nueva Venta</button>
     </div>
 </body>
 </html>

@@ -185,9 +185,17 @@
         </tbody>
     </table>
     
-    <!-- Total general -->
+    <!-- Totales -->
     <div class="total-section">
-        <span>Total: $<span id="totalAmount">0.00</span></span>
+        <div style="margin-bottom: 10px;">
+            <span>Subtotal: $<span id="subtotalAmount">0.00</span></span>
+        </div>
+        <div style="margin-bottom: 10px;">
+            <span>Total de Impuestos: $<span id="totalTaxAmount">0.00</span></span>
+        </div>
+        <div style="border-top: 2px solid #007bff; padding-top: 10px; margin-top: 10px;">
+            <span>Total: $<span id="totalAmount">0.00</span></span>
+        </div>
     </div>
     
     <!-- Sección de confirmación de venta -->
@@ -247,6 +255,7 @@
                         Código: ${product.codigo}<br>
                         Nombre: ${product.nombre}<br>
                         Precio: $${parseFloat(product.precio).toFixed(2)}<br>
+                        Impuesto: ${parseFloat(product.impuesto || 16).toFixed(2)}%<br>
                         Existencias: ${product.existencias}
                     `;
                     productInfoDiv.style.display = 'block';
@@ -306,6 +315,10 @@
                     saleItems[existingIndex].quantity -= quantity; // Revertir
                     return;
                 }
+                
+                // Actualizar impuesto calculado
+                const itemSubtotal = saleItems[existingIndex].price * saleItems[existingIndex].quantity;
+                saleItems[existingIndex].impuesto_calculado = itemSubtotal * (saleItems[existingIndex].impuesto / 100) / (1 + (saleItems[existingIndex].impuesto / 100));
             } else {
                 // Agregar nuevo producto a la venta
                 saleItems.push({
@@ -313,6 +326,8 @@
                     codigo: selectedProduct.codigo,
                     nombre: selectedProduct.nombre,
                     price: parseFloat(selectedProduct.precio),
+                    impuesto: parseFloat(selectedProduct.impuesto || 16),
+                    impuesto_calculado: parseFloat(selectedProduct.impuesto_calculado || 0),
                     quantity: quantity,
                     existencias: selectedProduct.existencias
                 });
@@ -343,6 +358,9 @@
             
             tbody.innerHTML = saleItems.map((item, index) => {
                 const subtotal = item.price * item.quantity;
+                // Recalcular impuesto para este item
+                const itemTax = subtotal * (item.impuesto / 100) / (1 + (item.impuesto / 100));
+                item.impuesto_calculado = itemTax;
                 return `
                     <tr>
                         <td>${item.codigo}</td>
@@ -385,6 +403,9 @@
             }
             
             item.quantity = quantity;
+            // Recalcular impuesto para este item
+            const itemSubtotal = item.price * item.quantity;
+            item.impuesto_calculado = itemSubtotal * (item.impuesto / 100) / (1 + (item.impuesto / 100));
             updateSaleTable();
             calculateTotal();
         }
@@ -401,13 +422,25 @@
         }
         
         /**
-         * Calcular total general
+         * Calcular total general e impuestos
          */
         function calculateTotal() {
-            const total = saleItems.reduce((sum, item) => {
-                return sum + (item.price * item.quantity);
-            }, 0);
+            let subtotal = 0;
+            let totalTax = 0;
             
+            saleItems.forEach(item => {
+                const itemSubtotal = item.price * item.quantity;
+                subtotal += itemSubtotal;
+                
+                // Calcular impuesto para este item: precio * (impuesto / 100) / (1 + impuesto / 100)
+                const itemTax = itemSubtotal * (item.impuesto / 100) / (1 + (item.impuesto / 100));
+                totalTax += itemTax;
+            });
+            
+            const total = subtotal;
+            
+            document.getElementById('subtotalAmount').textContent = (subtotal - totalTax).toFixed(2);
+            document.getElementById('totalTaxAmount').textContent = totalTax.toFixed(2);
             document.getElementById('totalAmount').textContent = total.toFixed(2);
             
             // Habilitar/deshabilitar botón de confirmar según haya productos
@@ -432,6 +465,17 @@
             // Obtener token CSRF
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             
+            // Calcular totales
+            let subtotal = 0;
+            let totalTax = 0;
+            
+            saleItems.forEach(item => {
+                const itemSubtotal = item.price * item.quantity;
+                subtotal += itemSubtotal;
+                const itemTax = itemSubtotal * (item.impuesto / 100) / (1 + (item.impuesto / 100));
+                totalTax += itemTax;
+            });
+            
             // Preparar el payload según el formato requerido
             const payload = {
                 products: saleItems.map(item => ({
@@ -440,7 +484,8 @@
                     price: item.price,
                     subtotal: item.price * item.quantity
                 })),
-                total: parseFloat(document.getElementById('totalAmount').textContent)
+                total: subtotal,
+                total_impuestos: totalTax
             };
             
             // Deshabilitar botón mientras se procesa
@@ -469,14 +514,8 @@
             })
             .then(result => {
                 if (result.status === 201 && result.data.success) {
-                    // Venta exitosa
-                    showMessage(`¡Venta registrada correctamente! ID: ${result.data.sale_id}`, 'success');
-                    
-                    // Limpiar el carrito después de 2 segundos
-                    setTimeout(() => {
-                        clearCart();
-                        hideMessage();
-                    }, 2000);
+                    // Venta exitosa - redirigir al ticket
+                    window.location.href = `{{ route('sales.ticket', ':id') }}`.replace(':id', result.data.sale_id);
                 } else if (result.status === 422) {
                     // Error de validación
                     let errorMessage = 'Error de validación: ';
