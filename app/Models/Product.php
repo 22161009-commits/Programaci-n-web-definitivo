@@ -11,6 +11,8 @@ class Product extends Model
         'codigo',
         'nombre',
         'precio',
+        'impuesto',
+        'impuesto_calculado',
         'existencias',
     ];
 

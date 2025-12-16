@@ -24,6 +24,7 @@ class RegisterAdminRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
+            'username' => ['required', 'string', 'max:255', 'unique:users,username', 'regex:/^[a-zA-Z0-9_]+$/'],
             'password' => ['required', 'string', 'confirmed', Password::defaults()],
             'admin_password' => ['required', 'string'],
         ];
@@ -39,6 +40,10 @@ class RegisterAdminRequest extends FormRequest
         return [
             'name.required' => 'El nombre es obligatorio.',
             'name.max' => 'El nombre no puede exceder 255 caracteres.',
+            'username.required' => 'El nombre de usuario es obligatorio.',
+            'username.max' => 'El nombre de usuario no puede exceder 255 caracteres.',
+            'username.unique' => 'Este nombre de usuario ya está en uso. Por favor, elige otro.',
+            'username.regex' => 'El nombre de usuario solo puede contener letras, números y guiones bajos.',
             'password.required' => 'La contraseña es obligatoria.',
             'password.confirmed' => 'Las contraseñas no coinciden.',
             'admin_password.required' => 'La contraseña de administrador es obligatoria.',

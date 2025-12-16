@@ -141,11 +141,15 @@
                 @enderror
             </div>
 
-            <div class="form-group" style="background-color: #f8f9fa; padding: 12px; border-radius: 5px; margin-bottom: 20px;">
-                <label style="color: #666; font-size: 14px;">Número de Empleado</label>
-                <p style="color: #666; font-size: 13px; margin: 5px 0 0 0;">
-                    Se generará automáticamente después del registro
-                </p>
+            <div class="form-group">
+                <label for="username">Nombre de Usuario</label>
+                <input type="text" id="username" name="username" value="{{ old('username') }}" required placeholder="admin123" pattern="[a-zA-Z0-9_]+" title="Solo letras, números y guiones bajos">
+                @error('username')
+                    <div class="error">{{ $message }}</div>
+                @enderror
+                <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                    Solo letras, números y guiones bajos. Debe ser único.
+                </small>
             </div>
 
             <div class="form-group">
