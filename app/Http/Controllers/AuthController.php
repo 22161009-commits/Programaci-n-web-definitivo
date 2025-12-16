@@ -34,7 +34,7 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request)
     {
-        $user = User::where('employee_number', $request->employee_number)->first();
+        $user = User::where('username', $request->username)->first();
 
         if ($user && Hash::check($request->password, $user->password)) {
             Auth::login($user, $request->filled('remember'));
@@ -44,8 +44,8 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'employee_number' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
-        ])->onlyInput('employee_number');
+            'username' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
+        ])->onlyInput('username');
     }
 
     /**
@@ -67,14 +67,14 @@ class AuthController extends Controller
     {
         $user = User::create([
             'name' => $request->name,
-            'employee_number' => User::generateEmployeeNumber(),
+            'username' => $request->username,
             'password' => Hash::make($request->password),
             'role' => 'vendedor',
         ]);
 
         Auth::login($user);
 
-        return redirect()->route('dashboard')->with('success', '¡Cuenta creada exitosamente! Tu número de empleado es: ' . $user->employee_number);
+        return redirect()->route('dashboard')->with('success', '¡Cuenta creada exitosamente!');
     }
 
     /**
@@ -103,14 +103,14 @@ class AuthController extends Controller
 
         $user = User::create([
             'name' => $request->name,
-            'employee_number' => User::generateEmployeeNumber(),
+            'username' => $request->username,
             'password' => Hash::make($request->password),
             'role' => 'admin',
         ]);
 
         Auth::login($user);
 
-        return redirect()->route('dashboard')->with('success', '¡Cuenta de administrador creada exitosamente! Tu número de empleado es: ' . $user->employee_number);
+        return redirect()->route('dashboard')->with('success', '¡Cuenta de administrador creada exitosamente!');
     }
 
     /**

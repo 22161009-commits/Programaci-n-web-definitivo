@@ -22,7 +22,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'employee_number' => ['required', 'string'],
+            'username' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string'],
         ];
     }
@@ -35,7 +35,8 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'employee_number.required' => 'El número de empleado es obligatorio.',
+            'username.required' => 'El nombre de usuario es obligatorio.',
+            'username.max' => 'El nombre de usuario no puede exceder 255 caracteres.',
             'password.required' => 'La contraseña es obligatoria.',
         ];
     }

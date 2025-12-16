@@ -86,10 +86,27 @@
         .stock {
             font-weight: 500;
         }
+        .links {
+            margin-bottom: 20px;
+        }
+        .links a {
+            margin-right: 15px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <h1>Gestión de Productos</h1>
+    
+    <div class="links">
+        <a href="{{ route('dashboard') }}">Inicio</a>
+        <a href="{{ route('providers.index') }}">Proveedores</a>
+        <a href="{{ route('sales.index') }}">Reporte de Ventas</a>
+    </div>
     
     @if (session('success'))
         <div class="success">
@@ -134,10 +151,6 @@
             @endforelse
         </tbody>
     </table>
-    
-    <div style="margin-top: 20px;">
-        <a href="{{ route('providers.index') }}">← Ver Proveedores</a>
-    </div>
 </body>
 </html>
 

@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
         // Crear usuario administrador
         User::create([
             'name' => 'Administrador',
-            'employee_number' => 'E000001',
+            'username' => 'admin',
             'password' => Hash::make('password'),
             'role' => 'admin',
         ]);
@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
         // Crear usuario vendedor de ejemplo
         User::create([
             'name' => 'Vendedor',
-            'employee_number' => 'E000002',
+            'username' => 'vendedor',
             'password' => Hash::make('password'),
             'role' => 'vendedor',
         ]);

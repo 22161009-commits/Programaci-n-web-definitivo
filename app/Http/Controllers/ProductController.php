@@ -33,7 +33,17 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
-        $product = Product::create($request->validated());
+        $validated = $request->validated();
+        
+        // Calcular el impuesto: precio * (impuesto / 100) / (1 + impuesto / 100)
+        // Si el precio ya incluye IVA, extraemos el impuesto
+        $precio = $validated['precio'];
+        $impuestoPorcentaje = $validated['impuesto'];
+        $impuestoCalculado = $precio * ($impuestoPorcentaje / 100) / (1 + ($impuestoPorcentaje / 100));
+        
+        $validated['impuesto_calculado'] = round($impuestoCalculado, 2);
+        
+        $product = Product::create($validated);
 
         // Sincronizar proveedores asociados (filtrar valores vacíos)
         $providers = array_filter($request->input('providers', []), function($value) {
@@ -67,7 +77,17 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
-        $product->update($request->validated());
+        $validated = $request->validated();
+        
+        // Calcular el impuesto: precio * (impuesto / 100) / (1 + impuesto / 100)
+        // Si el precio ya incluye IVA, extraemos el impuesto
+        $precio = $validated['precio'];
+        $impuestoPorcentaje = $validated['impuesto'];
+        $impuestoCalculado = $precio * ($impuestoPorcentaje / 100) / (1 + ($impuestoPorcentaje / 100));
+        
+        $validated['impuesto_calculado'] = round($impuestoCalculado, 2);
+        
+        $product->update($validated);
 
         // Sincronizar proveedores asociados (filtrar valores vacíos)
         $providers = array_filter($request->input('providers', []), function($value) {
