@@ -129,6 +129,46 @@
             margin-top: 5px;
             font-style: italic;
         }
+        .tax-input-wrapper {
+            position: relative;
+        }
+        .tax-input-wrapper::after {
+            content: '%';
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .tax-input-wrapper input {
+            padding-right: 28px;
+        }
+        .tax-calculation {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+        .tax-calculation-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        .tax-calculation-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .info-text {
+            color: #6c757d;
+            font-size: 12px;
+            margin-top: 5px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -185,7 +225,7 @@
         
         <div class="form-group">
             <label for="precio">
-                Precio <span class="required">*</span>
+                Precio (con IVA) <span class="required">*</span>
             </label>
             <div class="price-input-wrapper">
                 <input 
@@ -199,9 +239,40 @@
                     required
                 >
             </div>
+            <div class="info-text">El precio ingresado ya incluye el IVA</div>
             @error('precio')
                 <div class="error-text">{{ $message }}</div>
             @enderror
+        </div>
+        
+        <div class="form-group">
+            <label for="impuesto">
+                Porcentaje de Impuesto (IVA) <span class="required">*</span>
+            </label>
+            <div class="tax-input-wrapper">
+                <input 
+                    type="number" 
+                    id="impuesto" 
+                    name="impuesto" 
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    value="{{ old('impuesto', 16) }}"
+                    class="@error('impuesto') error @enderror"
+                    required
+                >
+            </div>
+            <div class="info-text">Porcentaje de impuesto (por defecto 16%)</div>
+            @error('impuesto')
+                <div class="error-text">{{ $message }}</div>
+            @enderror
+        </div>
+        
+        <div class="form-group">
+            <div class="tax-calculation">
+                <div class="tax-calculation-label">Impuesto Calculado:</div>
+                <div class="tax-calculation-value" id="impuesto-calculado">$0.00</div>
+            </div>
         </div>
         
         <div class="form-group">
@@ -260,6 +331,27 @@
             <a href="{{ route('products.index') }}" class="btn btn-secondary">Cancelar</a>
         </div>
     </form>
+    
+    <script>
+        function calcularImpuesto() {
+            const precio = parseFloat(document.getElementById('precio').value) || 0;
+            const impuestoPorcentaje = parseFloat(document.getElementById('impuesto').value) || 0;
+            
+            if (precio > 0 && impuestoPorcentaje >= 0) {
+                // Calcular el impuesto: precio * (impuesto / 100) / (1 + impuesto / 100)
+                const impuestoCalculado = precio * (impuestoPorcentaje / 100) / (1 + (impuestoPorcentaje / 100));
+                document.getElementById('impuesto-calculado').textContent = '$' + impuestoCalculado.toFixed(2);
+            } else {
+                document.getElementById('impuesto-calculado').textContent = '$0.00';
+            }
+        }
+        
+        document.getElementById('precio').addEventListener('input', calcularImpuesto);
+        document.getElementById('impuesto').addEventListener('input', calcularImpuesto);
+        
+        // Calcular al cargar la página
+        calcularImpuesto();
+    </script>
 </body>
 </html>
 
