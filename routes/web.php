@@ -36,6 +36,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
     Route::get('/sales/{sale}', [SaleController::class, 'show'])->name('sales.show');
     Route::get('/sales/{sale}/ticket', [SaleController::class, 'ticket'])->name('sales.ticket');
+    Route::post('/sales/{sale}/cancel', [SaleController::class, 'cancel'])->name('sales.cancel');
     
     // Rutas solo para Administradores
     Route::middleware('role:admin')->group(function () {

@@ -2,13 +2,49 @@
 
 namespace Tests\Feature;
 
+use App\Models\Product;
 use App\Models\Provider;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class ProviderTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->admin = User::create([
+            'name' => 'Admin User',
+            'username' => 'admin',
+            'password' => Hash::make('password'),
+            'role' => 'admin',
+        ]);
+    }
+
+    /** @test */
+    public function test_listar_proveedores()
+    {
+        Provider::create(['name' => 'Proveedor 1']);
+        Provider::create(['name' => 'Proveedor 2']);
+
+        $response = $this->actingAs($this->admin)->get(route('providers.index'));
+
+        $response->assertStatus(200);
+        $response->assertViewIs('providers.index');
+        $response->assertViewHas('providers');
+    }
+
+    /** @test */
+    public function test_mostrar_formulario_de_creacion()
+    {
+        $response = $this->actingAs($this->admin)->get(route('providers.create'));
+
+        $response->assertStatus(200);
+        $response->assertViewIs('providers.create');
+    }
 
     /** @test */
     public function test_crear_proveedor_correctamente()
@@ -21,7 +57,7 @@ class ProviderTest extends TestCase
             'address' => 'Calle Principal 123',
         ];
 
-        $response = $this->post(route('providers.store'), $providerData);
+        $response = $this->actingAs($this->admin)->post(route('providers.store'), $providerData);
 
         $response->assertRedirect(route('providers.index'));
         $response->assertSessionHas('success');
@@ -42,7 +78,7 @@ class ProviderTest extends TestCase
             'email' => 'proveedor@example.com',
         ];
 
-        $response = $this->post(route('providers.store'), $providerData);
+        $response = $this->actingAs($this->admin)->post(route('providers.store'), $providerData);
 
         $response->assertSessionHasErrors('name');
         $this->assertDatabaseCount('providers', 0);
@@ -61,7 +97,7 @@ class ProviderTest extends TestCase
             'email' => 'nuevo@example.com',
         ];
 
-        $response = $this->post(route('providers.store'), $providerData);
+        $response = $this->actingAs($this->admin)->post(route('providers.store'), $providerData);
 
         $response->assertSessionHasErrors('name');
         $this->assertDatabaseCount('providers', 1);
@@ -75,10 +111,35 @@ class ProviderTest extends TestCase
             'email' => 'email-invalido',
         ];
 
-        $response = $this->post(route('providers.store'), $providerData);
+        $response = $this->actingAs($this->admin)->post(route('providers.store'), $providerData);
 
         $response->assertSessionHasErrors('email');
         $this->assertDatabaseCount('providers', 0);
+    }
+
+    /** @test */
+    public function test_mostrar_formulario_de_edicion()
+    {
+        $provider = Provider::create([
+            'name' => 'Proveedor',
+        ]);
+
+        $product = Product::create([
+            'codigo' => '001',
+            'nombre' => 'Producto',
+            'precio' => 10.00,
+            'impuesto' => 16,
+            'existencias' => 50,
+        ]);
+
+        $provider->products()->attach($product->id);
+
+        $response = $this->actingAs($this->admin)->get(route('providers.edit', $provider));
+
+        $response->assertStatus(200);
+        $response->assertViewIs('providers.edit');
+        $response->assertViewHas('provider');
+        $response->assertViewHas('products');
     }
 
     /** @test */
@@ -100,7 +161,7 @@ class ProviderTest extends TestCase
             'address' => 'Dirección Actualizada',
         ];
 
-        $response = $this->put(route('providers.update', $provider), $updateData);
+        $response = $this->actingAs($this->admin)->put(route('providers.update', $provider), $updateData);
 
         $response->assertRedirect(route('providers.index'));
         $response->assertSessionHas('success');
@@ -115,6 +176,39 @@ class ProviderTest extends TestCase
     }
 
     /** @test */
+    public function test_actualizar_proveedor_con_productos()
+    {
+        $provider = Provider::create(['name' => 'Proveedor']);
+
+        $product1 = Product::create([
+            'codigo' => '001',
+            'nombre' => 'Producto 1',
+            'precio' => 10.00,
+            'impuesto' => 16,
+            'existencias' => 50,
+        ]);
+
+        $product2 = Product::create([
+            'codigo' => '002',
+            'nombre' => 'Producto 2',
+            'precio' => 20.00,
+            'impuesto' => 16,
+            'existencias' => 30,
+        ]);
+
+        $updateData = [
+            'name' => 'Proveedor',
+            'products' => [$product1->id, $product2->id],
+        ];
+
+        $response = $this->actingAs($this->admin)->put(route('providers.update', $provider), $updateData);
+
+        $response->assertRedirect(route('providers.index'));
+        $provider->refresh();
+        $this->assertCount(2, $provider->products);
+    }
+
+    /** @test */
     public function test_eliminar_proveedor()
     {
         $provider = Provider::create([
@@ -122,7 +216,7 @@ class ProviderTest extends TestCase
             'email' => 'eliminar@example.com',
         ]);
 
-        $response = $this->delete(route('providers.destroy', $provider));
+        $response = $this->actingAs($this->admin)->delete(route('providers.destroy', $provider));
 
         $response->assertRedirect(route('providers.index'));
         $response->assertSessionHas('success');
@@ -144,7 +238,7 @@ class ProviderTest extends TestCase
             'email' => 'nuevo@example.com',
         ];
 
-        $response = $this->put(route('providers.update', $provider), $updateData);
+        $response = $this->actingAs($this->admin)->put(route('providers.update', $provider), $updateData);
 
         $response->assertRedirect(route('providers.index'));
         $response->assertSessionHas('success');
@@ -163,7 +257,7 @@ class ProviderTest extends TestCase
             // No se envían contact_name, phone, email, address
         ];
 
-        $response = $this->post(route('providers.store'), $providerData);
+        $response = $this->actingAs($this->admin)->post(route('providers.store'), $providerData);
 
         $response->assertRedirect(route('providers.index'));
         $this->assertDatabaseHas('providers', [
@@ -173,6 +267,29 @@ class ProviderTest extends TestCase
             'email' => null,
             'address' => null,
         ]);
+    }
+
+    /** @test */
+    public function test_requiere_autenticacion_para_acceder_a_proveedores()
+    {
+        $response = $this->get(route('providers.index'));
+
+        $response->assertRedirect(route('login'));
+    }
+
+    /** @test */
+    public function test_requiere_rol_admin_para_acceder_a_proveedores()
+    {
+        $vendedor = User::create([
+            'name' => 'Vendedor',
+            'username' => 'vendedor',
+            'password' => Hash::make('password'),
+            'role' => 'vendedor',
+        ]);
+
+        $response = $this->actingAs($vendedor)->get(route('providers.index'));
+
+        $response->assertStatus(403);
     }
 }
 
